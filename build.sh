@@ -3,6 +3,7 @@ project="chess_in_raylib"
 
 inc_raylib="-Lraylib/src/ -lraylib -Iraylib/src"
 inc_terra="-Lterra -lterra -Iterra/include"
+inc_cheli="-Lcheli -lcheli -Icheli/include"
 
 red_echo() {
     local text=$1
@@ -38,6 +39,22 @@ if [ ! -f ./terra/libterra.a ]; then
 fi
 #####################################
 
+########## Compiling Cheli ##########
+if [ ! -f ./cheli/libcheli.a ]; then
+    cd cheli && ./build.sh -lib
+    error_code=$?
+
+    cd ../
+
+    echo -n "Compiling Cheli "
+    if [ $error_code -eq 0 ]; then
+        green_echo "finished"
+    else
+        red_echo "failed"
+    fi
+fi
+#####################################
+
 ######### Compiling Raylib #########
     cd raylib/src/ 
     make PLATFORM=PLATFORM_DESKTOP -j
@@ -57,7 +74,8 @@ fi
 ######### Add Source Files #########
     g++ -o $project -Wextra -Wall -pedantic -g -Iinclude \
         src/main.cpp \
-        $inc_raylib $inc_terra -lm
+        src/chessgame.cpp \
+        $inc_cheli $inc_terra $inc_raylib -lm
 ###################################
     error_code=$?
     echo -n "Compiling "

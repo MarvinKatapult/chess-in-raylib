@@ -1,9 +1,10 @@
 
-#include <tlog.hpp>
+#include "chessgame.hpp"
 
 int main() {
 
-    TLog::log( "Hello World\n" ); 
+    ChessGame game;
+    game.run();
 
     return 0;
 }

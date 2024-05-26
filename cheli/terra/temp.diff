@@ -1,0 +1,200 @@
+diff --git a/build.sh b/build.sh
+index 41c4086..7129847 100755
+--- a/build.sh
++++ b/build.sh
+@@ -34,7 +34,8 @@ if [ "$1" == "-so" ]; then
+     g++ -c src/tstring.cpp      -Iinclude -fPIC -o debug/tstring.o && \
+     g++ -c src/tfile.cpp        -Iinclude -fPIC -o debug/tfile.o && \
+     g++ -c src/tvector.cpp      -Iinclude -fPIC -o debug/tvector.o && \
+-    g++ -shared debug/* -fPIC -o lib${project}.so
++    g++ -c src/tstringlist.cpp  -Iinclude -fPIC -o debug/tstringlist.o && \
++    g++ -shared debug/* -fPIC -o lib${project}.so 
+ ###################################
+     error_code=$?
+ 
+@@ -64,7 +65,8 @@ elif [ "$1" == "-lib" ]; then
+     g++ -c src/tlog.cpp         -Iinclude  -fPIC    -o debug/tlog.o && \
+     g++ -c src/tstring.cpp      -Iinclude  -fPIC    -o debug/tstring.o && \
+     g++ -c src/tfile.cpp        -Iinclude  -fPIC    -o debug/tfile.o && \
+-    g++ -c src/tvector.cpp      -Iinclude   -fPIC   -o debug/tvector.o && \
++    g++ -c src/tvector.cpp      -Iinclude  -fPIC    -o debug/tvector.o && \
++    g++ -c src/tstringlist.cpp  -Iinclude  -fPIC    -o debug/tstringlist.o && \
+     ar rcs lib$project.a debug/*
+ ###################################
+     error_code=$?
+@@ -82,7 +84,7 @@ else
+     echo -n "Compiling all files for project "
+     yellow_echo "$project"
+ ######### Add Source Files #########
+-    g++ -o $project -Wextra -Wall -pedantic -g -Iinclude -lcrypto \
++    g++ -o $project -Wextra -Wall -pedantic -g -Iinclude \
+         src/main.cpp \
+         src/tmatrix.cpp \
+         src/tlog.cpp \
+@@ -90,6 +92,7 @@ else
+         src/tstring.cpp \
+         src/tfile.cpp \
+         src/tvector.cpp \
++        src/tstringlist.cpp \
+ ###################################
+     error_code=$?
+     echo -n "Compiling "
+diff --git a/include/tfile.hpp b/include/tfile.hpp
+index 1301406..c8f2f6c 100644
+--- a/include/tfile.hpp
++++ b/include/tfile.hpp
+@@ -1,5 +1,7 @@
+ #pragma once
+ 
++#include "tstring.hpp"
++
+ class TString;
+ typedef struct _IO_FILE FILE;
+ 
+diff --git a/include/tlist.hpp b/include/tlist.hpp
+index 2cead1d..fd6cc86 100644
+--- a/include/tlist.hpp
++++ b/include/tlist.hpp
+@@ -37,11 +37,11 @@ class TList {
+ 	public:
+ 
+         /** Constructors **/
+-		TList();
++		TList( void );
+         TList( const TList & list );
+ 
+         /** Deconstructor **/
+-		~TList();
++		~TList( void );
+ 
+         /** Modification **/
+ 		void clear( void );
+diff --git a/include/tstring.hpp b/include/tstring.hpp
+index a65ac5f..b463e37 100644
+--- a/include/tstring.hpp
++++ b/include/tstring.hpp
+@@ -17,12 +17,12 @@ class TString {
+         ~TString( void );
+ 
+         /** Modification **/
+-        void append( const TString & str );
+-        void prepend( const TString & str );
+-        TString remove( const TString & str, bool only_first = false );
+-        void insert( int position, const TString & str );
+-        void replace( const TString & r_str, const TString & d_str );
+-        void clear( void );
++        TString & append( const TString & str );
++        TString & prepend( const TString & str );
++        TString & remove( const TString & str, bool only_first = false );
++        TString & insert( int position, const TString & str );
++        TString & replace( const TString & r_str, const TString & d_str );
++        TString & clear( void );
+ 
+         /** Utils **/
+         const char * ascii( void ) const;
+diff --git a/src/tfile.cpp b/src/tfile.cpp
+index 71c4229..7a1db10 100644
+--- a/src/tfile.cpp
++++ b/src/tfile.cpp
+@@ -2,9 +2,8 @@
+ 
+ #include <stdio.h>
+ #include <stdlib.h>
+-#include <limits.h>
+ 
+-#include "tstring.hpp"
++#include <limits.h>
+ 
+ TFile::TFile( const TString & p_filename, FileMode p_mode ) {
+     myFile = fopen( p_filename.ascii(), p_mode == Read ? "r" : "a" );
+diff --git a/src/tstring.cpp b/src/tstring.cpp
+index 9824fc8..6dc634c 100644
+--- a/src/tstring.cpp
++++ b/src/tstring.cpp
+@@ -44,10 +44,12 @@ TString::~TString() {
+     free( myBuffer );
+ }
+ 
+-void TString::clear() {
++TString & TString::clear() {
+     free( myBuffer );
+     myBuffer = (char *)malloc( sizeof( char * ) );
+     *myBuffer = '\0';
++
++    return  *this;
+ }
+ 
+ void TString::initializeBuffer() {
+@@ -63,7 +65,7 @@ char * TString::convertNumberToString( long p_number ) {
+     return buffer;
+ }
+ 
+-void TString::append( const TString & p_str ) {
++TString & TString::append( const TString & p_str ) {
+     const int start_length = strlen( myBuffer );
+     const int end_length = p_str.length() + start_length;
+ 
+@@ -74,9 +76,11 @@ void TString::append( const TString & p_str ) {
+ 
+     free( myBuffer );
+     myBuffer = buffer;
++
++    return *this;
+ }
+ 
+-void TString::prepend( const TString & p_str ) {
++TString & TString::prepend( const TString & p_str ) {
+     const int start_length = strlen( myBuffer );
+     const int end_length = p_str.length() + start_length;
+ 
+@@ -87,9 +91,11 @@ void TString::prepend( const TString & p_str ) {
+ 
+     free( myBuffer );
+     myBuffer = buffer;
++
++    return *this;
+ }
+ 
+-TString TString::remove( const TString & p_str, bool p_only_first ) {
++TString & TString::remove( const TString & p_str, bool p_only_first ) {
+     char * pos;
+     int len = strlen( p_str.ascii() );
+     
+@@ -101,7 +107,7 @@ TString TString::remove( const TString & p_str, bool p_only_first ) {
+     return *this;
+ }
+ 
+-void TString::insert( int p_position, const TString & p_str ) {
++TString & TString::insert( int p_position, const TString & p_str ) {
+     const int new_length = length() + p_str.length() + 1;
+     char * buffer = (char *)malloc( sizeof( char * ) * new_length );
+ 
+@@ -122,13 +128,17 @@ void TString::insert( int p_position, const TString & p_str ) {
+ 
+     free( myBuffer );
+     myBuffer = buffer;
++
++    return *this;
+ }
+ 
+-void TString::replace( const TString & p_r_str, const TString & p_d_str ) {
++TString & TString::replace( const TString & p_r_str, const TString & p_d_str ) {
+     for ( int i = find( p_r_str ); i != -1; i = find( p_r_str ) ) {
+         remove( p_r_str, true );
+         insert( i, p_d_str );
+     }
++
++    return *this;
+ }
+ 
+ const char * TString::ascii() const {
+diff --git a/src/tvector.cpp b/src/tvector.cpp
+index c6f38c8..026f8df 100644
+--- a/src/tvector.cpp
++++ b/src/tvector.cpp
+@@ -1,4 +1,4 @@
+-#include "volvector.hpp"
++#include "tvector.hpp"
+ #include "math.h"
+ 
+ void Vector3::add( const Vector3 & p_other ) {
