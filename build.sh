@@ -24,7 +24,7 @@ echo -n "Compiling all files for project "
 yellow_echo "$project"
 
 ########## Compiling Terra ##########
-if [ ! -f ./terra/libterra.a ]; then
+if [ ! -f ./terra/libterra.a ] || [ "$1" == "all" ]; then
     cd terra && ./build.sh -lib
     error_code=$?
 
@@ -40,7 +40,7 @@ fi
 #####################################
 
 ########## Compiling Cheli ##########
-if [ ! -f ./cheli/libcheli.a ]; then
+if [ ! -f ./cheli/libcheli.a ] || [ "$1" == "all" ]; then
     cd cheli && ./build.sh -lib
     error_code=$?
 

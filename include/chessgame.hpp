@@ -1,7 +1,9 @@
 #pragma once
 
 class Board;
-class Texture;
+class Square;
+struct Texture;
+struct Font;
 
 #include "piece.hpp"
 
@@ -22,9 +24,17 @@ class ChessGame {
 
         void loadTextures( void );
 
+        void inputHandeling( void );
+        void pressEvent( void );
+
         void drawBoard( void );
         void drawBoardPieces( void );
+        void drawMoveDot( int x, int y );
+        void drawPossibleMoves( void );
 
+        Square * mySelectedSquare;
         Texture * myPieceTextures[PIECE_COLOR_COUNT][PIECE_COUNT];
         Board * myBoard;
+        Font * myFont;
+        Pieces::PieceColor myTurn;
 };

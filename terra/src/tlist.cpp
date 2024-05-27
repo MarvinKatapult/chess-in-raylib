@@ -3,10 +3,12 @@
 
 TList::TList() {
 	myLength = 0;
+    myFirstElement = 0L;
 }
 
 TList::TList( const TList & p_list ) {
     myLength = 0;
+    myFirstElement = 0L;
     
     for ( int i = 0; i < p_list.count(); i++ ) {
         append( p_list.getValue( i ) );
