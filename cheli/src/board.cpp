@@ -41,6 +41,7 @@ Board::~Board() {
 }
 
 bool Board::set( const char * p_fenstring ) {
+    clear();
 
     int square_index = 0;
     int char_index = 0; 
@@ -128,4 +129,12 @@ void Board::playMove( const Move & p_move ) {
     mySquares[p_move.destY()][p_move.destX()]->piece = p_move.piece();
 
     myLastMove = new Move( p_move );
+}
+
+void Board::clear() {
+    for ( int y = 0; y < BOARD_HEIGHT; y++ ) {
+        for ( int x = 0; x < BOARD_WIDTH; x++ ) {
+            mySquares[y][x]->piece = Pieces::NoPiece;
+        }
+    }
 }

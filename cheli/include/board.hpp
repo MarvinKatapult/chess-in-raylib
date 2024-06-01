@@ -24,6 +24,7 @@ class Board {
         bool set( const char * fenstring );
         void set( const Board & other );
         void playMove( const Move & move );
+        void clear( void );
 
         /** Utils **/
         Square getSquare( int x, int y ) const;

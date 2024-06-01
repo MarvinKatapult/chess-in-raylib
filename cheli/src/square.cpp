@@ -30,8 +30,8 @@ Square & Square::operator=( const Square & p_other ) {
 }
 
 TString Square::name( void ) const {
-    TString str( 8 - y );
-    str += (char)( 97 + x );
+    TString str( (char)(97 + x) );
+    str += 8 - y;
 
     return str;
 }

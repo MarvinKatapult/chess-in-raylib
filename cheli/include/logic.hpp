@@ -3,7 +3,7 @@
 class Board;
 class Square;
 class TList;
-class TList;
+class Move;
 typedef char PieceSymbol;
 
 #include "piece.hpp"
@@ -32,10 +32,11 @@ class Logic {
 
         /** Utils **/
         TList getLegals( bool check_for_checks = true ) const;
-        void getLegals( TList * list, const Square & square ) const;
-        void getLegals( TList * legals, int x, int y ) const;
+        void getLegals( TList * list, const Square & square, bool remove_self_checks = true ) const;
+        void getLegals( TList * legals, int x, int y, bool remove_self_checks = true ) const;
         Pieces::PieceColor isCheck( void ) const;
         Pieces::PieceColor isCheckmate( void ) const;
+        bool moveIsLegal( const Move & move ) const;
 
         static bool squareHasEnemy( const Square & square, Pieces::PieceColor color );
         static bool squareHasAlly( const Square & p_square, Pieces::PieceColor p_color );

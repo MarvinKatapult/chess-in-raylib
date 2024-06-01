@@ -35,6 +35,5 @@ class ChessGame {
         Square * mySelectedSquare;
         Texture * myPieceTextures[PIECE_COLOR_COUNT][PIECE_COUNT];
         Board * myBoard;
-        Font * myFont;
         Pieces::PieceColor myTurn;
 };

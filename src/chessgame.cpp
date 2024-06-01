@@ -29,7 +29,6 @@ ChessGame::ChessGame() {
     myBoard = new Board( DEFAULT_FENSTRING );
     mySelectedSquare = 0L;
     myTurn = Pieces::White;
-    // *myFont = LoadFont( "assets/LiberationMono-Bold.ttf" );
 }
 
 ChessGame::~ChessGame() {
@@ -41,7 +40,6 @@ ChessGame::~ChessGame() {
     } 
 
     delete myBoard;
-    // delete myFont;
 }
 
 void ChessGame::run() {
@@ -105,23 +103,25 @@ void ChessGame::pressEvent() {
     }
     Square pressed_square = myBoard->getSquare( (int)clicked_square.x, (int)clicked_square.y );
 
+    // Change selected Square
     if ( Pieces::getColor( pressed_square.piece ) == myTurn ) {
         if ( mySelectedSquare ) delete mySelectedSquare;
         mySelectedSquare = new Square( pressed_square );
         return;
     }
 
-    if ( !mySelectedSquare ) return;
+    if ( !mySelectedSquare ) return; 
 
     // Check for movement
-    if ( ( pressed_square.piece == Pieces::NoPiece || Pieces::getColor( pressed_square.piece ) != myTurn ) && mySelectedSquare->piece != Pieces::NoPiece ) {
+    bool is_square_free = ( pressed_square.piece == Pieces::NoPiece || Pieces::getColor( pressed_square.piece ) != myTurn );
+    if ( is_square_free ) {
         // Try to move
         Move move( *mySelectedSquare, pressed_square );
         Logic logic( myBoard );
         if ( logic.moveIsLegal( move ) ) {
             myTurn = myTurn == Pieces::White ? Pieces::Black : Pieces::White;
             myBoard->playMove( move );
-            TLog::log( "%s\n", move.getNotation().ascii() );
+            TLog::log( "Played Move:%s\n", move.getNotation().ascii() );
             delete mySelectedSquare;
             mySelectedSquare = 0L;
         }
@@ -130,6 +130,11 @@ void ChessGame::pressEvent() {
 
 void ChessGame::inputHandeling() {
     if ( IsMouseButtonPressed( MOUSE_BUTTON_LEFT ) ) pressEvent();
+    if ( IsMouseButtonPressed( MOUSE_BUTTON_RIGHT ) ) mySelectedSquare = 0L;
+
+    if ( IsKeyPressed( KEY_A ) ) {
+        myBoard->set( "8/8/8/ppp3N1/8/8/8/8" );
+    }
 }
 
 void ChessGame::drawBoard() {

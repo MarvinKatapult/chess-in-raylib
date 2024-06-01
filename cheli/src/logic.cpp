@@ -23,7 +23,7 @@ TList Logic::getLegals( bool p_check_for_checks ) const {
 
     for ( int y = 0; y < BOARD_HEIGHT; y++ ) {
         for ( int x = 0; x < BOARD_WIDTH; x++ ) {
-            getLegals( &moves, x, y );        
+            getLegals( &moves, x, y, p_check_for_checks );        
         }
     }
     
@@ -52,7 +52,7 @@ void Logic::removeIllegalMoves( TList * p_list ) const {
     }
 }
 
-void Logic::getLegals( TList * p_legals, const Square & p_square ) const {
+void Logic::getLegals( TList * p_legals, const Square & p_square, bool p_remove_self_checks ) const {
     if ( !p_legals ) return;
 
     const Piece piece = p_square.piece;
@@ -82,13 +82,15 @@ void Logic::getLegals( TList * p_legals, const Square & p_square ) const {
             getLegalsKnight( p_legals, p_square );
             break;
     }
+
+    if ( p_remove_self_checks ) removeIllegalMoves( p_legals );
 }
 
-void Logic::getLegals( TList * p_legals, int p_x, int p_y ) const { 
+void Logic::getLegals( TList * p_legals, int p_x, int p_y, bool p_remove_self_checks ) const {
     if ( !p_legals ) return;
 
     Square square = myBoard->getSquare( p_x, p_y );
-    getLegals( p_legals, square );
+    getLegals( p_legals, square, p_remove_self_checks );
 }
 
 void Logic::getLegalsPawn( TList * p_list, const Square & p_start_square ) const {
@@ -200,17 +202,16 @@ void Logic::getLegalsPawnCapture( TList * p_list, const Square & p_start_square 
     const int start_y = p_start_square.y;
     const int move_dir_y = GET_PAWN_Y_DIRECTION( pawn );
 
+    int dest_x = 0;
     if ( start_x > 0 ) {
-        // Capture to the left    
-        Square dest_square = myBoard->getSquare( start_x - 1, start_y + move_dir_y );
-        checkPawnCapture( p_list, p_start_square, dest_square );
+        dest_x = start_x - 1;
+    } else if ( start_x < 7 ) {
+        dest_x = start_x + 1;
     }
+    const int dest_y = start_y + move_dir_y;
+    if ( !COORD_IS_IN_BOUNDS( dest_x ) || !COORD_IS_IN_BOUNDS( dest_y ) ) return;
 
-    if ( start_x < 7 ) {
-        // Capture to the right
-        Square dest_square = myBoard->getSquare( start_x + 1, start_y + move_dir_y );
-        checkPawnCapture( p_list, p_start_square, dest_square );
-    }
+    checkPawnCapture( p_list, p_start_square, myBoard->getSquare( dest_x, dest_y ) );
 } 
 
 void Logic::checkPawnCapture( TList * p_list, const Square & p_start_square, const Square & p_dest_square ) const {
@@ -328,6 +329,11 @@ Pieces::PieceColor Logic::isCheckmate() const {
     
     Move::freeMoves( legals );
     return checkmate;
+}
+
+bool Logic::moveIsLegal( const Move & p_move ) const {
+    TList legals = getLegals();
+    return Move::moveIsInLegals( legals, p_move );
 }
 
 bool Logic::squareHasEnemy( const Square & p_square, Pieces::PieceColor p_color ) {

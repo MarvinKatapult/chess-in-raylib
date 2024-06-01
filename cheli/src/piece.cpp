@@ -13,6 +13,7 @@ bool Pieces::isPiece( char p_piece ) {
 }
 
 Pieces::PieceColor Pieces::getColor( Piece p_piece ) {
+    if ( p_piece == Pieces::NoPiece ) return Pieces::NoColor;
     return islower( p_piece ) != 0 ? Pieces::Black : Pieces::White;
 }
 

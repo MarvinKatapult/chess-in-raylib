@@ -6,7 +6,8 @@
                                    MOV.startSquare().piece, MOV.startSquare().x, MOV.startSquare().y, \
                                    MOV.destSquare().x, MOV.destSquare().y )
 
-#define PRINT_MOVE( MOV )   PRINT_MOVE_C( TLog::White, MOV )
+#define PRINT_MOVE( MOV )       PRINT_MOVE_C( TLog::White, MOV )
+#define PRINT_MOVE_NOT( MOV )   TLog::log( "%s\n", MOV.getNotation().ascii() )
 
 class TString;
 class TList;
@@ -33,11 +34,13 @@ class Move {
         Piece piece( void ) const { return myStartSquare.piece; }
         TString getNotation( void ) const;
 
+        static bool moveIsInLegals( const TList & legals, Move move );
         static TList getMoves( const TList & moves, Pieces::PieceColor color );
         static void freeMoves( const TList & list );
 
         /** Operators **/
         Move & operator=( const Move & other );
+        bool operator==( const Move & other );
 
     
     private:
